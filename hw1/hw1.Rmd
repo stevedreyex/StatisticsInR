@@ -1,0 +1,191 @@
+---
+---
+---
+
+# 2023 Statistics HW1
+
+311554032 數據所 廖子濬
+
+## 1.
+
+### 1a. **(10 points) Please plot the data with X indicating "Percent returning" and Y indicating "New adults". Comment on the main features of the plot. Any possible outliers? (可用軟體畫)**
+
+```{r}
+# Percent returning
+
+
+x = c(74, 66, 81, 52, 73, 62, 52, 45, 62, 46, 60, 46, 38)
+
+
+
+# New adults
+
+
+y = c(5, 6, 8, 11, 12, 15, 16, 17, 18, 18, 19, 20, 20)
+
+plot(x, y, col = 'red', main = 'Bird Colonies', xlab = 'Percent returning', ylab = 'New adults')
+```
+
+### 1b. **(10 points) Apply the formula to compute \... 可以用電腦協助操作公式**
+
+mean of X:
+
+```{r}
+result.mean <- mean(x)
+print(result.mean)
+```
+
+mean of Y:
+
+```{r}
+result.mean <- mean(y)
+print(result.mean)
+```
+
+Var of X:
+
+```{r}
+print(sum((x-mean(x))^2)/(length(x)-1))
+```
+
+Var of Y:
+
+```{r}
+print(sum((y-mean(y))^2)/(length(y)-1))
+```
+
+Pearson's correlation:
+
+```{r}
+print(cor(x, y, method = 'pearson'))
+```
+
+### 1c. **(10 points) Use R (軟體) to compute Pearson's correlation, Kendall's tau and Spearman's rho. (相關係數指令在講義)**
+
+Pearson's Correlation
+
+```{r}
+(stddev = sum((x - mean(x)) * (y - mean(y))) / sqrt(sum((x - mean(x))^2) * sum((y - mean(y))^2)))
+```
+
+Spearman's rho
+
+```{r}
+r_x = rank(x)
+r_y = rank(y)
+print(r_x)
+print(r_y)
+# z = sum((r_x-mean(r_x))(r_y-mean(r_y))) / (length(x)-1)
+sd(r_x)
+sd(r_y)
+print(1-(6*sum((r_x-r_y)^2)/(13*168)))
+```
+
+Kendall's tau
+
+```{r}
+library(DescTools)
+tab <- table(x, y)
+ConDisPairs(tab)[c("C","D")]
+```
+
+```{r}
+(14-59)/(13*6)
+```
+
+### **1d. (15 points) Please fit the regression model:**
+
+```{r}
+df <- data.frame(x, y)
+lm.fit <-lm(y ~ x , data=df)
+summary(lm.fit)
+coef(lm.fit)
+
+#get model summary
+model_summ <-summary(lm.fit)
+#calculate MSE
+mean(model_summ$residuals^2)
+```
+
+### 1e. (5 points) What is the value of ... Is it true that R^2^ = r^2^
+
+ans: No, according to the result above, R^2^: 0.5602, r^2^: 0.5202
+
+### 1f. Please plot e  Y  Y (Y axis) versus Y (X axis). Comment on the residual plot. What does this plot indicate?
+
+```{r}
+res <- resid(lm.fit)
+#produce residual vs. fitted plot
+plot(fitted(lm.fit), res)
+
+#add a horizontal line at 0 
+abline(0,0)
+```
+
+No pattern in residual plot. Model is sounded.
+
+## 2 (45 points) 全部用軟體的指令
+
+### 2a. (10 points) Please plot the data with X indicating "Soda" and Y indicating "Milk". Comment on the main features of the plot. Any possible outliers? 這裡我 建議把 Milk 當成 Y, 是因為牛奶攝取是營養學家或家長比較在意的.
+
+```{r}
+#Soda
+x = c(35.1, 35.7, 46.2, 47.4, 47.9, 49.7, 49.3)
+#Milk
+y = c(27.6, 26.7, 25.7, 23.9, 23.0, 22.9, 23.3)
+plot(x, y, col = 'red', main = 'Milk or Soda?', xlab = 'Soda', ylab = 'Milk')
+```
+
+Two points on the upper left of figure might be the outliers.
+
+### 2b. (10 points) Use R (軟體) to compute Pearson's correlation, Kendall's tau and Spearman's rho.
+
+```{r}
+cor.test(x,y,alternative = "two.sided",method = "pearson")
+cor.test(x,y,alternative = "two.sided",method = "spearman")
+cor.test(x,y,alternative = "two.sided",method = "kendall")
+```
+
+### 2c. (10 points) Use R to fit the regression model: Show your output and explain the meaning of  .
+
+```{r}
+df = data.frame(x, y)
+lm.fit <-lm(y ~ x , data=df)
+summary(lm.fit)
+coef(lm.fit)
+
+#get model summary
+model_summ <-summary(lm.fit)
+#calculate MSE
+mean(model_summ$residuals^2)
+```
+
+𝛃 is the "Estimated x" above, which x=-0.28 means that it has slightly negative correlations between x and y.
+
+### 2d. (15 points) Show the residual plot and the normal plot. Make your comments.
+
+Hint: You need to know the purposes of these two plots and judge whether the plots support the assumptions that
+
+#### Residual plot
+
+```{r}
+res <- resid(lm.fit)
+#produce residual vs. fitted plot
+plot(fitted(lm.fit), res)
+
+#add a horizontal line at 0 
+abline(0,0)
+```
+
+Comments: Consist unstable variance
+
+#### Normal plot
+
+```{r}
+# Load package, MASS
+# library(MASS)
+qqnorm(y)
+qqline(y)
+```
+
+Comments: 有問題 (偏離常態)
