@@ -1,0 +1,195 @@
+---
+---
+---
+
+# HW3 311554032
+
+## 1. Data: Waste Water
+
+Let group 1 = "AF", group 2 = "FS", group 3: "FCC"\
+Scientists concerned with treatment of tar sand wastewater studied three treatment methods for the removal of organic carbon. (Based on W. R. Pirie, Statistical Planning and Analysis for Treatments of Tar Sand Wastewater, Technical Information Center, Office of Scientific and Technological Information, United States Department of Energy.) The three treatment methods used were air flotation (AF), foam separation (FS), and ferric-chloride coagulation (FCC). The organic carbon material measurements for the three treatments yielded the following data:
+
+![](fig1.png)
+
+The data is provided in the file "wastewater.csv".
+
+### 1.a.
+
+Test H0 : u1 = u2 = u3 versus Ha : not H0 at 5% level of significance. State your conclusion.\
+Hint: One-Way ANOVA
+
+```{r}
+wastewater <- read.csv("wastewater.csv")
+wastewater
+```
+
+```{r}
+library(tidyr)
+wastewater_reshaped <- wastewater %>% 
+  pivot_longer(cols = c("AF", "FS", "FCC"), 
+               names_to = "level", 
+               values_to = "value")
+# wastewater_reshaped
+fm1=aov(value~level,data=wastewater_reshaped)
+summary(fm1)
+```
+
+Comments: P value very close to 0, means there's **at least one group is significant**
+
+### 1.b.
+
+Plot side-by-side boxplots for the three groups and comment on the results. Which method is the best?
+
+```{r}
+boxplot(value~level,data=wastewater_reshaped)
+```
+
+Comments: **FCC is the best**, which perform the removing the best, then AF. FS is the has the worst performance.
+
+## 2. Data = "fern.csv"
+
+```         
+研究光的波長對蕨類生長的影響
+```
+
+Astudy is conducted of the effect of light on the growth of ferns. Since plants grow at various rates at different ages. this variable is controlled by blocking. Four young plants (plants grown in the dark for 4 days) and four older plants (plants grown in the dark for 12 days) are utilized in the study. thus producing two blocks each of size 4. Four different light treatments are investigated. Each treatment is randomly assigned to one plant in each block. The treatments consist of exposing-each plant to a single dose of light, returning it to the dark, and measuring the cross-sectional area of the fern tip 24 hours after the light is administered. These data resulted (cross-sectional area is given in square micrometers):
+
+![](fig2.png)
+
+### 2.a. 
+
+What is the blocking variable? Please test whether the blocking effect exists or not at 5% level of significance. State your conclusion.
+
+```{r}
+data = read.csv("Fern.csv")
+data
+```
+
+```{r}
+# Load the fern.csv data
+fern <- read.csv("Fern.csv")
+
+# Perform ANOVA with blocking variable "Block_age"
+# and store the result in "test_result"
+test_result <- aov(Response_area ~ wave_light, data = fern)
+
+# Check if the blocking variable is significant at 5% level
+summary(test_result)
+boxplot(Response_area~wave_light,data=fern)
+```
+
+```{r}
+test_result <- aov(Response_area ~ Block_age, data = fern)
+
+# Check if the blocking variable is significant at 5% level
+summary(test_result)
+boxplot(Response_area~Block_age,data=fern)
+```
+
+Comments: The blocking effect exists, which is at 5% level of significance. **The younger fern, the higher response area**. Can't see the effect on the wavelength.
+
+### 2.b.
+
+Please test whether the treatment effect (i.e. wavelength of light) exists or not at 5% level of significance. State your conclusion.
+
+```{r}
+fm2=aov(Response_area~factor(Block_age)+factor(wave_light),data=fern)
+summary(fm2)
+```
+
+```{r}
+qf(0.017, 1, 3)
+qf(0.27, 3, 3)
+```
+
+Comments: wavelength of light **can also reject** H0 due to the F value
+
+## 3. Data: "Cotinine.csv"
+
+Cotinine is a major metabolite of nicotine. It is currently considered to be the best indicator of tobacco smoke exposure. A study is conducted to detect possible racial differences in cotinine level in young adults. These data are obtained on the cotinine level in milligrams per milliliter:
+
+![](fig3.png)
+
+### 3.a.
+
+Plot the means for the 4 treatment combinations. Comment on whether interaction effect exists.
+
+```{r}
+data = read.csv("Cotinine.csv")
+boxplot(cotinine ~ Gender * Race, data = data)
+```
+
+Comments: Black seems to have more cotinine. The variance of white male seems to be high. Outliers exists.
+
+### 3.b.
+
+Perform two-way ANOVA and test whether interaction effect exists or not. Level of significance = 5%.
+
+```{r}
+data = read.csv("Cotinine.csv")
+model <- aov(cotinine ~ Gender * Race, data = data)
+summary(model)
+TukeyHSD(model)
+```
+
+Comments: However, the interaction **failed to rejected.**
+
+### 3.c.
+
+Test the two main effects at 5% level of significance.
+
+```{r}
+model <- aov(cotinine ~ Race, data = data)
+summary(model)
+```
+
+```{r}
+model <- aov(cotinine ~ Gender, data = data)
+summary(model)
+```
+
+Comments: Both Gender and Race, individually, are not significant.
+
+## 4. Data: "mood.csv"
+
+4\. In homework 2, you have analyzed the data provided in the file "mood.csv". Suppose we are interested in studying the effect of different types of music on people's moods. We collect data on 60 participants and record their mood score (out of 10) after listening to one of three types of music: classical, jazz, or pop. In the file "mood.csv" The data look like![](fig4.png)
+
+### 4.a.
+
+Plot the means for the 6 treatment combinations. Comment on whether interaction effect exists.
+
+```{r}
+data = read.csv("mood.csv")
+boxplot(MoodScore ~ MusicType * Gender, data = data)
+```
+
+Comments: Male preferred to listen Pop, and Female preferred to listen Classical and Jazz music.
+
+### 4.b.
+
+Perform two-way ANOVA and test whether interaction effect exists or not. Level of significance = 5%. Explain the result.
+
+```{r}
+data = read.csv("mood.csv")
+model <- aov(MoodScore ~ MusicType * Gender, data = data)
+summary(model)
+TukeyHSD(model)
+```
+
+Comments: There is no significant difference in MoodScore between the Pop-Jazz , Male-Female group There is a significant difference in MoodScore between the Jazz-Classical and Pop-Classical groups.
+
+### 4.c.
+
+Test the two main effects at 5% level of significance. Explain the result.
+
+```{r}
+model <- aov(MoodScore ~ MusicType, data = data)
+summary(model)
+```
+
+```{r}
+model <- aov(MoodScore ~ Gender, data = data)
+summary(model)
+```
+
+Comments: MusicType has a stronger influence on MoodScore than Gender, which MusicType is rejected bot Gender isn't
